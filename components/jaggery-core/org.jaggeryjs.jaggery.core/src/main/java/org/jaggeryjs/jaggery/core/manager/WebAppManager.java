@@ -416,7 +416,28 @@ public class WebAppManager {
         return (JaggeryContext) ctx.getAttribute(SHARED_JAGGERY_CONTEXT);
     }
 
-    public static JaggeryContext clonedJaggeryContext(ServletContext context) {
+    public static JaggeryContext clonedJaggeryContext(ServletContext context){
+        try {
+            JaggeryContext sharedContext = new JaggeryContext();
+            Context cxs = Context.getCurrentContext();
+            CommonManager.initContext(sharedContext);
+
+            sharedContext.addProperty(Constants.SERVLET_CONTEXT, context);
+            sharedContext.addProperty(FileHostObject.JAVASCRIPT_FILE_MANAGER, new WebAppFileManager(context));
+            sharedContext.addProperty(Constants.JAGGERY_REQUIRED_MODULES, new HashMap<String, ScriptableObject>());
+            String logLevel = (String) context.getAttribute(LogHostObject.LOG_LEVEL);
+            if (logLevel != null) {
+                sharedContext.addProperty(LogHostObject.LOG_LEVEL, logLevel);
+            }
+            ScriptableObject sharedScopes = sharedContext.getScope();
+            JavaScriptProperty application = new JavaScriptProperty("application");
+            application.setValue(cxs.newObject(sharedScopes, "Application", new Object[]{context}));
+            application.setAttribute(ScriptableObject.READONLY);
+            RhinoEngine.defineProperty(sharedScopes, application);
+            context.setAttribute(SHARED_JAGGERY_CONTEXT, sharedContext);
+        }catch (ScriptException e){System.out.print("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL");}
+
+
         JaggeryContext shared = sharedJaggeryContext(context);
         RhinoEngine engine = shared.getEngine();
         Scriptable sharedScope = shared.getScope();
@@ -607,19 +628,20 @@ public class WebAppManager {
     }
 
     public static String getScriptPath(HttpServletRequest request) {
-        String url = request.getServletPath();
-        Map<String, Object> urlMappings = (Map<String, Object>) request.getServletContext()
-                .getAttribute(CommonManager.JAGGERY_URLS_MAP);
-        if (urlMappings == null) {
-            return url;
-        }
-        String path;
-        if (url.equals("/")) {
-            path = getPath(urlMappings, url);
-        } else {
-            path = resolveScriptPath(new ArrayList<String>(Arrays.asList(url.substring(1).split("/", -1))), urlMappings);
-        }
-        return path == null ? url : path;
+        return request.getRequestURI();
+//        String url = request.getServletPath();
+//        Map<String, Object> urlMappings = (Map<String, Object>) request.getServletContext()
+//                .getAttribute(CommonManager.JAGGERY_URLS_MAP);
+//        if (urlMappings == null) {
+//            return url;
+//        }
+//        String path;
+//        if (url.equals("/")) {
+//            path = getPath(urlMappings, url);
+//        } else {
+//            path = resolveScriptPath(new ArrayList<String>(Arrays.asList(url.substring(1).split("/", -1))), urlMappings);
+//        }
+//        return path == null ? url : path;
     }
 
     private static String resolveScriptPath(List<String> parts, Map<String, Object> map) {
@@ -697,10 +719,12 @@ public class WebAppManager {
 
     }
 
-    private static JaggeryContext createJaggeryContext(Context cx, OutputStream out, String scriptPath,
+    private static JaggeryContext   createJaggeryContext(Context cx, OutputStream out, String scriptPath,
                                                        HttpServletRequest request, HttpServletResponse response) {
         ServletContext servletContext = request.getServletContext();
-        JaggeryContext context = clonedJaggeryContext(servletContext);
+
+            JaggeryContext context = clonedJaggeryContext(servletContext);
+
         CommonManager.setJaggeryContext(context);
         context.addProperty(SERVLET_REQUEST, request);
         context.addProperty(SERVLET_RESPONSE, response);

@@ -29,7 +29,7 @@ import java.io.File;
 /**
  * Axis2 deployer for deploying Web applications
  */
-public class JaggeryDeployer extends AbstractWebappDeployer {
+    public class JaggeryDeployer extends AbstractWebappDeployer {
 
     private static final Log log = LogFactory.getLog(JaggeryDeployer.class);
 

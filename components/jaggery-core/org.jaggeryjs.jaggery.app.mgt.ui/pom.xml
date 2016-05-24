@@ -23,7 +23,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.jaggeryjs.jaggery.app.mgt.ui</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
     <name>Jaggery Management UI</name>
     <description>Jaggery management UI bundle</description>
     <url>http://wso2.org</url>

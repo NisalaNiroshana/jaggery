@@ -17,6 +17,7 @@ public class JaggeryServlet extends HttpServlet {
 
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        System.out.print("Nisala Niroshana Nanayakkara");
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

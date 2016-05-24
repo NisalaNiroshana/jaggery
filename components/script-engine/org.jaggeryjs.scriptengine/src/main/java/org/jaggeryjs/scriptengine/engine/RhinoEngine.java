@@ -471,6 +471,7 @@ public class RhinoEngine {
         }
 
         for (JavaScriptScript script : module.getScripts()) {
+
             script.getScript().exec(cx, scope);
         }
     }

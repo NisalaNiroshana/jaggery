@@ -24,7 +24,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.jaggeryjs.jaggery.app.mgt</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
     <name>WSO2 Carbon - Jaggery Management BE</name>
     <description>Jaggery management BE fuctionalities</description>
     <url>http://wso2.org</url>
