@@ -20,12 +20,9 @@ public class CacheManager {
     private static final Log log = LogFactory.getLog(CacheManager.class);
 
     private static final String PACKAGE_NAME = "org.jaggeryjs.rhino";
-
-    private ClassCompiler compiler;
-
-    private ConcurrentMap<String, TenantWrapper> tenants = new ConcurrentHashMap<String, TenantWrapper>();
-
     private final Object lock0 = new Object();
+    private ClassCompiler compiler;
+    private ConcurrentMap<String, TenantWrapper> tenants = new ConcurrentHashMap<String, TenantWrapper>();
 
     public CacheManager(CompilerEnvirons compilerEnv) {
         if (compilerEnv == null) {
@@ -33,6 +30,14 @@ public class CacheManager {
             compilerEnv.setErrorReporter(new ToolErrorReporter(true));
         }
         this.compiler = new ClassCompiler(compilerEnv);
+    }
+
+    private static String getClassName(TenantWrapper tenant, ScriptCachingContext sctx) throws ScriptException {
+        String filteredPath = ContextWrapper.getPackage(sctx.getContext(), sctx.getPath());
+        PackageWrapper packageWrapper = tenant.getPath(sctx);
+        long classIndex = packageWrapper.getClassIndex();
+        packageWrapper.setClassIndex(classIndex + 1);
+        return PACKAGE_NAME + filteredPath + ".c" + classIndex;
     }
 
     public void invalidateCache(ScriptCachingContext sctx) throws ScriptException {
@@ -133,21 +138,14 @@ public class CacheManager {
         return tenant;
     }
 
-    private static String getClassName(TenantWrapper tenant, ScriptCachingContext sctx) throws ScriptException {
-        String filteredPath = ContextWrapper.getPackage(sctx.getContext(), sctx.getPath());
-        PackageWrapper packageWrapper = tenant.getPath(sctx);
-        long classIndex = packageWrapper.getClassIndex();
-        packageWrapper.setClassIndex(classIndex + 1);
-        return PACKAGE_NAME + filteredPath + ".c" + classIndex;
-    }
-
     private CachingContext getCachingContext(ScriptCachingContext sctx) {
         TenantWrapper tenant = tenants.get(sctx.getTenantId());
         if (tenant == null) {
             return null;
         }
         return tenant.getCachingContext(sctx);
-    }
+        }
+
 
     private Script getScriptObject(Object[] compiled, ScriptCachingContext sctx) throws ScriptException {
         String className = (String) compiled[0];

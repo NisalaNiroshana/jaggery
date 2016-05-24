@@ -6,7 +6,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jaggeryjs.hostobjects.file.FileHostObject;
 import org.jaggeryjs.hostobjects.log.LogHostObject;
-import org.jaggeryjs.hostobjects.web.ApplicationHostObject;
 import org.jaggeryjs.hostobjects.web.Constants;
 import org.jaggeryjs.jaggery.core.JaggeryCoreConstants;
 import org.jaggeryjs.jaggery.core.ScriptReader;
@@ -31,7 +30,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.*;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -41,24 +39,15 @@ import java.util.*;
 
 public class WebAppManager {
 
-    private static final Log log = LogFactory.getLog(WebAppManager.class);
-
     public static final String CORE_MODULE_NAME = "core";
-
     public static final String SERVLET_RESPONSE = "webappmanager.servlet.response";
-
     public static final String SERVLET_REQUEST = "webappmanager.servlet.request";
-
-    private static final String DEFAULT_CONTENT_TYPE = "text/html";
-
-    private static final String DEFAULT_CHAR_ENCODING = "UTF-8";
-
     public static final String JAGGERY_MODULES_DIR = "modules";
-
     public static final String WS_REQUEST_PATH = "requestURI";
-
     public static final String WS_SERVLET_CONTEXT = "/websocket";
-
+    private static final Log log = LogFactory.getLog(WebAppManager.class);
+    private static final String DEFAULT_CONTENT_TYPE = "text/html";
+    private static final String DEFAULT_CHAR_ENCODING = "UTF-8";
     private static final String SHARED_JAGGERY_CONTEXT = "shared.jaggery.context";
 
     private static final String SERVE_FUNCTION_JAGGERY = "org.jaggeryjs.serveFunction";
@@ -68,12 +57,9 @@ public class WebAppManager {
     private static final Map<String, List<String>> intervals = new HashMap<String, List<String>>();
 
     private static final Map<String, Object> locks = new HashMap<String, Object>();
-
-    private static boolean isWebSocket = false;
-
     private static final Object modRefreshLock = new Object();
-
     private static final String ATTRIBUTE_PREFIX = "org.jaggeryjs.";
+    private static boolean isWebSocket = false;
 
     static {
         try {
@@ -524,13 +510,21 @@ public class WebAppManager {
 
     public static void execute(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        if (!ModuleManager.isModuleRefreshEnabled()) {
-            exec(request, response);
-            return;
+        try {
+            if (!ModuleManager.isModuleRefreshEnabled()) {
+                exec(request, response);
+                return;
+            }
+            synchronized (modRefreshLock) {
+                exec(request, response);
+            }
+            System.out.println("No error");
+        } catch (Throwable throwable) {
+            System.out.println("error occured");
+            throwable.printStackTrace();
+            throw throwable;
         }
-        synchronized (modRefreshLock) {
-            exec(request, response);
-        }
+
     }
 
     private static void exec(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -628,7 +622,7 @@ public class WebAppManager {
     }
 
     public static String getScriptPath(HttpServletRequest request) {
-        return request.getRequestURI();
+        return request.getRequestURI().replace(request.getContextPath(), "");
 //        String url = request.getServletPath();
 //        Map<String, Object> urlMappings = (Map<String, Object>) request.getServletContext()
 //                .getAttribute(CommonManager.JAGGERY_URLS_MAP);
