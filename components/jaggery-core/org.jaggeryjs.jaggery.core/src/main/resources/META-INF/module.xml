@@ -73,10 +73,10 @@
         <className>org.jaggeryjs.hostobjects.jaggeryparser.JaggeryParserHostObject</className>
         <name>JaggeryParser</name>
     </hostObject>
-    <hostObject>
+    <!--<hostObject>
         <className>org.jaggeryjs.hostobjects.web.WebSocketHostObject</className>
         <name>WebSocket</name>
-    </hostObject>
+    </hostObject>-->
 
     <!-- methods -->
     <method readOnly="true">

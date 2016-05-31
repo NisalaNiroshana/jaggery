@@ -78,7 +78,7 @@ public class WebAppManager {
     static {
         try {
 
-            String jaggeryDir = System.getProperty("jaggery.home");
+            String jaggeryDir = System.getProperty("catalina.base")+ File.pathSeparator+"jaggery";
             if (jaggeryDir == null) {
                 jaggeryDir = System.getProperty("carbon.home");
             }
@@ -417,6 +417,28 @@ public class WebAppManager {
     }
 
     public static JaggeryContext clonedJaggeryContext(ServletContext context) {
+        try {
+            JaggeryContext sharedContext = new JaggeryContext();
+            Context cxs = Context.getCurrentContext();
+            CommonManager.initContext(sharedContext);
+
+            sharedContext.addProperty(Constants.SERVLET_CONTEXT, context);
+            sharedContext.addProperty(FileHostObject.JAVASCRIPT_FILE_MANAGER, new WebAppFileManager(context));
+            sharedContext.addProperty(Constants.JAGGERY_REQUIRED_MODULES, new HashMap<String, ScriptableObject>());
+            String logLevel = (String) context.getAttribute(LogHostObject.LOG_LEVEL);
+            if (logLevel != null) {
+                sharedContext.addProperty(LogHostObject.LOG_LEVEL, logLevel);
+            }
+            ScriptableObject sharedScopes = sharedContext.getScope();
+            JavaScriptProperty application = new JavaScriptProperty("application");
+            application.setValue(cxs.newObject(sharedScopes, "Application", new Object[]{context}));
+            application.setAttribute(ScriptableObject.READONLY);
+            RhinoEngine.defineProperty(sharedScopes, application);
+            context.setAttribute(SHARED_JAGGERY_CONTEXT, sharedContext);
+        }catch (ScriptException e){
+            e.printStackTrace();
+        }
+
         JaggeryContext shared = sharedJaggeryContext(context);
         RhinoEngine engine = shared.getEngine();
         Scriptable sharedScope = shared.getScope();
