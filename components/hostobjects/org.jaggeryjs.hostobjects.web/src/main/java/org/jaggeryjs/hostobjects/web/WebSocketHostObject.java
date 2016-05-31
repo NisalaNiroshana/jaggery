@@ -41,7 +41,7 @@ public class WebSocketHostObject extends ScriptableObject {
     public WebSocketHostObject() {
 
     }
-    
+
     @Override
     public String getClassName() {
         return hostObjectName;
@@ -85,7 +85,7 @@ public class WebSocketHostObject extends ScriptableObject {
     public Scriptable jsGet_ontext() {
         return textCallback;
     }
-    
+
     public void jsSet_onopen(Object openFunction) throws ScriptException {
         if (!(openFunction instanceof Function)) {
             HostObjectUtil.invalidProperty(hostObjectName, "onopen", "function", openFunction);
@@ -96,7 +96,7 @@ public class WebSocketHostObject extends ScriptableObject {
     public Scriptable jsGet_onopen() {
         return onOpencallback;
     }
-    
+
     public void jsSet_onclose(Object closeFunction) throws ScriptException {
         if (!(closeFunction instanceof Function)) {
             HostObjectUtil.invalidProperty(hostObjectName, "onclose", "function", closeFunction);
@@ -158,7 +158,7 @@ public class WebSocketHostObject extends ScriptableObject {
     public void setInbound(MessageInbound inbound) {
         this.inbound = inbound;
     }
-    
+
     public WsOutbound getOutbound() {
 		return outbound;
 	}
@@ -176,7 +176,7 @@ public class WebSocketHostObject extends ScriptableObject {
         textCallback.call(cx, this, this, new Object[]{charBuffer.toString()});
         RhinoEngine.exitContext();
     }
-    
+
     public void processOnOpen(WsOutbound wsOutbound) {
         if (onOpencallback == null) {
             return;
@@ -186,7 +186,7 @@ public class WebSocketHostObject extends ScriptableObject {
         onOpencallback.call(cx, this, this, new Object[]{wsOutbound});
         RhinoEngine.exitContext();
     }
-    
+
     public void processOnClose(int status) {
         if (onCloseCallback == null) {
             return;

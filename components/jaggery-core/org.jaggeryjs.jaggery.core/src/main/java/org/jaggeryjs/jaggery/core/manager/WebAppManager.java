@@ -64,7 +64,7 @@ public class WebAppManager {
     static {
         try {
 
-            String jaggeryDir = System.getProperty("jaggery.home");
+            String jaggeryDir = System.getProperty("catalina.base")+ File.pathSeparator+"jaggery";
             if (jaggeryDir == null) {
                 jaggeryDir = System.getProperty("carbon.home");
             }
@@ -421,8 +421,9 @@ public class WebAppManager {
             application.setAttribute(ScriptableObject.READONLY);
             RhinoEngine.defineProperty(sharedScopes, application);
             context.setAttribute(SHARED_JAGGERY_CONTEXT, sharedContext);
-        }catch (ScriptException e){System.out.print("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL");}
-
+        }catch (ScriptException e){
+            log.error(""+e.getMessage());
+        }
 
         JaggeryContext shared = sharedJaggeryContext(context);
         RhinoEngine engine = shared.getEngine();
@@ -537,9 +538,11 @@ public class WebAppManager {
         try {
             engine = CommonManager.getInstance().getEngine();
             cx = engine.enterContext();
+
             String scriptPath = getScriptPath(request);
             OutputStream out = response.getOutputStream();
             context = createJaggeryContext(cx, out, scriptPath, request, response);
+
             context.addProperty(FileHostObject.JAVASCRIPT_FILE_MANAGER,
                     new WebAppFileManager(request.getServletContext()));
 
@@ -620,6 +623,23 @@ public class WebAppManager {
             }
         }
     }
+
+//    public static String getScriptPath(HttpServletRequest request) {
+//        return request.getRequestURI().replace(request.getContextPath(), "");
+////        String url = request.getServletPath();
+////        Map<String, Object> urlMappings = (Map<String, Object>) request.getServletContext()
+////                .getAttribute(CommonManager.JAGGERY_URLS_MAP);
+////        if (urlMappings == null) {
+////            return url;
+////        }
+////        String path;
+////        if (url.equals("/")) {
+////            path = getPath(urlMappings, url);
+////        } else {
+////            path = resolveScriptPath(new ArrayList<String>(Arrays.asList(url.substring(1).split("/", -1))), urlMappings);
+////        }
+////        return path == null ? url : path;
+
 
     public static String getScriptPath(HttpServletRequest request) {
         return request.getRequestURI().replace(request.getContextPath(), "");

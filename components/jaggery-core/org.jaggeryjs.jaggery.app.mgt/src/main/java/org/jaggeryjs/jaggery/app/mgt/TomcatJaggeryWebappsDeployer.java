@@ -379,7 +379,7 @@ public class TomcatJaggeryWebappsDeployer extends TomcatGenericWebappsDeployer {
             addSecurityConstraints(ctx, jaggeryConfig);
             setLoginConfig(ctx, jaggeryConfig);
             addSecurityRoles(ctx, jaggeryConfig);
-           // addUrlMappings(ctx, jaggeryConfig);
+            addUrlMappings(ctx, jaggeryConfig);
             addParameters(ctx, jaggeryConfig);
             addLogLevel(ctx, jaggeryConfig);
         }
