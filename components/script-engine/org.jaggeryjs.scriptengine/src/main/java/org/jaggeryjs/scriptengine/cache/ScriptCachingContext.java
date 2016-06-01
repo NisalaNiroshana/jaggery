@@ -18,6 +18,9 @@ public class ScriptCachingContext {
     }
 
     public String getTenantId() {
+        if (tenantId == null) {
+            return "-1234";
+        }
         return tenantId;
     }
 
